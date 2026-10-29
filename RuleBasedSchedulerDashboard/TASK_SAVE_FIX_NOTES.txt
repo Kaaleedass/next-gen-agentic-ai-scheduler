@@ -1,0 +1,30 @@
+TASK SAVE / DISPLAY FIX — NOTES
+===============================
+
+What changed
+------------
+- Add Task now writes to the authoritative TASK_MASTER table in the configured SQLite database.
+- OUTPUT_PATH is written to TASK_OUTPUT_CONFIG in the same transaction.
+- A create operation is reported as successful only after the committed row is read back from a fresh SQLite connection.
+- The HTML immediately displays the verified row returned by the API. If a periodic refresh is already in progress, a follow-up refresh is queued rather than discarded.
+- Update and manual-action endpoints return database verification details and log failures in the Flask console.
+- The Run button stays disabled until the task appears in TASK_MASTER_LOCAL, the scheduler's cached copy refreshed approximately every 30 seconds. This prevents a just-added task from being launched from a minimal fallback record before its full script path is loaded into the running scheduler.
+- The dashboard's database pill now shows the number of TASK_MASTER rows. Hover it to see the resolved database path.
+- Open http://127.0.0.1:8765/api/db/diagnostics to inspect database path, TASK_MASTER count, output-config count, cache count/IDs and SQLite integrity.
+- Run `python verify_dashboard_db.py` for a read-only command-line diagnostic.
+
+Install / restart
+-----------------
+1. Stop ONLY the dashboard API with Ctrl+C in its terminal. Do not stop or modify the running LangGraph scheduler.
+2. Replace the dashboard folder files with the contents of this ZIP.
+3. Keep `.env` and your OpenAI key if already configured; this ZIP includes `.env.example`, not your private `.env`.
+4. Start `scheduler_dashboard_api.py` again.
+5. Open http://127.0.0.1:8765 and press Ctrl+F5.
+6. Add a test task. The toast must say it was saved and verified in TASK_MASTER and show its ID/database path. Open /api/db/diagnostics and confirm the same ID is present.
+7. The Run button is expected to remain disabled briefly after adding a task until the scheduler refreshes TASK_MASTER_LOCAL. Refresh the page after about 30 seconds.
+
+If a save still fails
+--------------------
+- Read the exact error toast. It now includes the SQLite/schema error.
+- Check http://127.0.0.1:8765/api/db/diagnostics and compare `db_path` to the running scheduler's SQLITE_FILE (`C:\Users\Kaale\Desktop\MY_Personal_project\Task_scheduler_agent\TASK_TABLE\scheduler.db` in the provided scheduler source).
+- The Flask terminal logs `TASK_CREATE_VERIFIED` on success or `TASK_CREATE_SQLITE_ERROR` / `TASK_CREATE_ERROR` on failure.

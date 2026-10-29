@@ -1,0 +1,73 @@
+SCHEDULER STUDIO — START HERE
+=============================
+
+1) Extract the ZIP to a normal local folder, for example:
+   C:\Users\Kaale\Desktop\Scheduler_Studio
+
+2) Use Python 3.12. In this folder, copy .env.example to .env and enter your
+   own OpenAI API key if you want GPT-4o mini and CrewAI analysis.
+
+3) Install dependencies from this folder:
+   python -m pip install -r requirements.txt
+
+4) Confirm DB_PATH in scheduler_dashboard_api.py matches the SAME SQLite file
+   used by your existing rule-based LangGraph scheduler. Do not change or stop
+   the LangGraph scheduler as part of this dashboard setup.
+
+5) Run run_dashboard.bat, then open:
+   http://127.0.0.1:8765
+
+6) The bottom command bar has voice and reading-speed dropdowns. Select an
+   installed voice, choose a slower or faster rate (default 0.78x), then press
+   the small play button to preview both settings. Your voice and speed choices
+   are remembered by that browser. Speed options range from 0.60x to 1.15x.
+   “Auto · English (India)” selects a suitable English voice automatically.
+
+7) Voice dictation uses the browser speech-recognition engine (en-IN). Allow
+   microphone permission when Edge/Chrome asks. The speaker button turns spoken
+   replies on/off; the robot mouth animates while a reply is spoken.
+
+8) Set log and output paths on each task, then use “Scan Logs & Outputs” to
+   verify the task log and inspect output files. Use the task output question
+   workflow to ask questions grounded in the selected task's available data.
+
+9) Troubleshooting:
+   - If the dropdown only shows Auto, open Windows Settings > Time & language >
+     Speech and install/enable speech voices; then reload the dashboard.
+   - If the robot picture is missing, open http://127.0.0.1:8765/robot-agent.png.
+   - DB diagnostics: http://127.0.0.1:8765/api/db/diagnostics
+
+Security note: the dashboard is designed to bind only to 127.0.0.1. Keep your
+.env file private. Do not expose this development server to your network.
+
+10) Log verification behaviour:
+    - Each selected log file is streamed from beginning to end for error/failure
+      markers and explicit success markers; the monitor does not rely only on the
+      last few lines.
+    - A normal successful result is shown in two lines: verdict, then confirmation
+      that the complete log scan found no error markers (with scanned line count).
+    - If failure evidence exists, the second line shows the first detected reason.
+    - The AI sees a bounded excerpt plus whole-file marker evidence, while detailed
+      scan metadata remains in the monitor record. Business-data questions still
+      inspect the configured output file separately.
+
+RUN + OUTPUT QUESTION WORKFLOW (latest fix)
+- A request such as "run IPO data collector and tell me the open IPOs" is routed to a single run-and-answer workflow even when the stored task name uses underscores.
+- The initial request gets one confirmation. If the assistant previously asked in chat and you answered "yes", that answer counts as confirmation; the browser will not ask again.
+- After the existing scheduler processes the queued action, the dashboard waits for a changed terminal status, scans the log, and then reads the configured output file to answer the original question.
+- If the log contains failure evidence, the dashboard reports the failure and will not answer from stale output. If no failure is found but explicit success cannot be verified, it will still try to answer only when the output file was modified after the run started.
+- If the configured output file was not updated during the run, the dashboard refuses to answer from potentially stale data.
+- The existing LangGraph scheduler is not modified. Keep it running against the same SQLite database.
+
+OPENAI NOVA VOICE
+-----------------------------
+To enable OpenAI Nova, set your allowed OPENAI_API_KEY in .env and restart the dashboard. In the voice dropdown, choose "OpenAI Nova · API voice" and press the preview button. The server calls /v1/audio/speech using model tts-1 and voice nova. The API key stays on the server. OpenAI API usage may incur charges.
+
+
+AUTOMATIC LOG MONITORING
+The CrewAI background log/output monitor is disabled by default so it cannot
+interrupt the run-and-answer orchestration flow. The assistant waits for the
+task to finish and answers from the configured output file. Use the dashboard's
+"Scan Logs & Outputs" button only when you explicitly want a log scan.
+To opt back into automatic background scans, set ENABLE_BACKGROUND_LOG_MONITOR=1
+in your .env file and restart the dashboard API.

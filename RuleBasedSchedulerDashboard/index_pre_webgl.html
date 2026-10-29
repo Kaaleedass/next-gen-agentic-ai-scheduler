@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scheduler Agent Control Center</title>
+<style>
+
+:root{
+ --bg:#f3f7ff;--panel:#ffffff;--panel2:#f7faff;--line:#dce6f5;
+ --text:#17243b;--muted:#71809a;--blue:#2868f5;--blue2:#6b8cff;
+ --green:#0e9f6e;--red:#d83b57;--amber:#c77a08;--shadow:0 16px 40px rgba(39,76,140,.10)
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 12% 0%,#dce9ff 0,transparent 34%),radial-gradient(ellipse at 92% 12%,#e4f9f3 0,transparent 27%),var(--bg);color:var(--text);font:14px/1.5 Inter,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1480px;margin:auto;padding:28px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:54px;height:54px;border-radius:18px;background:linear-gradient(145deg,#4c88ff,#6555e8);display:grid;place-items:center;color:#fff;font-size:26px;font-weight:800;box-shadow:inset 3px 3px 7px #ffffff65,inset -5px -6px 12px #203bb055,0 12px 24px #5279e44a;transform:perspective(300px) rotateY(-8deg)}
+h1{font-size:25px;margin:0 0 3px;letter-spacing:-.7px}.sub{color:var(--muted)}
+.status-pill{border:1px solid #b7ead8;color:#087c58;background:#e6fbf3;padding:9px 13px;border-radius:99px;display:flex;align-items:center;gap:8px;font-weight:650}.dot{width:8px;height:8px;background:currentColor;border-radius:50%;box-shadow:0 0 0 4px #0e9f6e18}
+.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,.65fr);gap:20px;align-items:center;padding:26px 30px;margin-bottom:20px;border:1px solid #cbdcff;border-radius:24px;background:linear-gradient(115deg,#fff 0%,#f5f8ff 52%,#e9f1ff 100%);box-shadow:0 18px 42px #315c9b15,inset 0 1px #fff}
+.hero:before{content:"";position:absolute;width:340px;height:340px;border-radius:50%;right:10%;top:-250px;background:#d7e5ff;filter:blur(2px)}
+.hero-copy{position:relative;z-index:1}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3465cb;font-weight:800}.hero h2{font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-1px;margin:9px 0 10px;max-width:700px}.hero p{color:#61718d;max-width:620px;margin:0 0 18px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.agent-visual{position:relative;min-height:160px;display:flex;align-items:center;justify-content:center;perspective:700px}
+.orb{width:130px;height:130px;border-radius:42% 58% 57% 43%/45% 43% 57% 55%;background:radial-gradient(circle at 28% 22%,#fff 0 5%,#d7e5ff 10%,#7da6ff 30%,#4769e9 60%,#2d3cae 100%);box-shadow:inset 8px 8px 20px #ffffffa8,inset -15px -18px 30px #202f9d80,0 24px 38px #4568d74a;transform:rotateX(12deg) rotateY(-18deg);animation:float 5s ease-in-out infinite;position:relative}
+.orb:before{content:"";position:absolute;left:27px;top:37px;width:13px;height:13px;background:#fff;border-radius:50%;box-shadow:33px 0 0 #fff,0 0 16px #fff,33px 0 16px #fff}
+.orb:after{content:"";position:absolute;left:43px;top:69px;width:32px;height:12px;border-bottom:4px solid #fff;border-radius:0 0 20px 20px;opacity:.9}
+.orbit{position:absolute;width:190px;height:62px;border:2px solid #8aa9ff8a;border-radius:50%;transform:rotate(-23deg);box-shadow:0 0 20px #8aa9ff28}
+.orbit.two{width:165px;height:82px;transform:rotate(55deg);border-color:#64c9b880}
+@keyframes float{0%,100%{transform:translateY(0) rotateX(12deg) rotateY(-18deg)}50%{transform:translateY(-9px) rotateX(8deg) rotateY(-8deg)}}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}
+.stat,.panel{background:rgba(255,255,255,.92);border:1px solid #dfe8f7;border-radius:20px;box-shadow:var(--shadow);min-width:0}
+.stat{padding:19px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}.stat:hover{transform:translateY(-3px);box-shadow:0 22px 40px #315c9b1c}
+.stat:after{content:"";position:absolute;right:-28px;top:-38px;width:105px;height:105px;border-radius:50%;background:linear-gradient(145deg,#e9f0ff,#fff);box-shadow:inset 4px 4px 12px #dce7ff,0 5px 15px #7899db18}
+.stat-head{position:relative;z-index:1;color:var(--muted);font-size:12px;display:flex;justify-content:space-between}.stat-num{position:relative;z-index:1;font-size:32px;font-weight:800;margin-top:11px;letter-spacing:-1.2px;color:#1d3153}.stat-foot{position:relative;z-index:1;font-size:12px;color:var(--muted);margin-top:3px}
+.content{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.8fr);gap:18px;align-items:start}
+.panel{padding:21px}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.panel-title h2{margin:0;font-size:17px;letter-spacing:-.25px}.panel-title p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.btn{border:1px solid #d6e1f2;border-radius:11px;padding:9px 13px;color:#31415d;background:linear-gradient(180deg,#fff,#f4f7fc);cursor:pointer;font:inherit;font-weight:650;box-shadow:0 2px 0 #dce5f2,0 5px 12px #294b7a0a;transition:.16s}.btn:hover{filter:brightness(1.015);transform:translateY(-2px);box-shadow:0 4px 0 #dce5f2,0 8px 16px #294b7a15}.btn.primary{background:linear-gradient(135deg,#3e7bff,#5c62e8);color:#fff;border:0;box-shadow:inset 0 1px #ffffff70,0 5px 0 #304ec3,0 12px 20px #436de52a;font-weight:750}.btn.primary:hover{box-shadow:inset 0 1px #ffffff70,0 3px 0 #304ec3,0 9px 18px #436de52a}.btn.danger{border-color:#f1cbd3;background:linear-gradient(180deg,#fff7f8,#fff0f3);color:#b52b46}.btn.small{font-size:11px;padding:7px 9px;border-radius:9px}.btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.search{background:#f8faff;border:1px solid #dce6f5;color:var(--text);border-radius:11px;padding:10px 12px;min-width:180px;outline:none}.search:focus,input:focus,select:focus{border-color:#7da3ff;box-shadow:0 0 0 3px #6e9bff20}
+.table-wrap{overflow:auto;border:1px solid #e2eaf6;border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:770px}th{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#7b8aa3;font-weight:800;background:linear-gradient(180deg,#f8faff,#f0f5fc);text-align:left;padding:13px}td{padding:14px 13px;border-top:1px solid #edf1f8;vertical-align:middle}tbody tr:hover{background:#f8fbff}.taskname{font-weight:750;color:#223656}.taskmeta{color:#8a98ad;font-size:11px;margin-top:4px;max-width:280px;overflow-wrap:anywhere}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 9px;font-size:11px;font-weight:750;white-space:nowrap}.badge:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.b-success{background:#e2f9ef;color:#087d56}.b-fail{background:#fff0f2;color:#c22f4c}.b-running{background:#fff5df;color:#a56b00}.b-idle{background:#eef3fa;color:#63738d}.switch{appearance:none;width:36px;height:21px;border-radius:99px;background:#cbd5e4;position:relative;cursor:pointer;vertical-align:middle;transition:.2s;box-shadow:inset 0 1px 3px #52617a25}.switch:checked{background:#19b47c}.switch:before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #20314a38}.switch:checked:before{left:18px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:#63738d;font-weight:650}input,select{width:100%;background:#f9fbff;border:1px solid #dce6f5;color:var(--text);border-radius:11px;padding:10px 11px;font:inherit;outline:none}.hint{font-size:11px;color:#7d8ba2}.form-actions{display:flex;gap:9px;margin-top:16px}.empty{padding:32px;text-align:center;color:#8492a9}.events{display:flex;flex-direction:column;gap:9px}.event{display:grid;grid-template-columns:10px 1fr;gap:10px;padding:12px;border:1px solid #e2eaf6;border-radius:13px;background:linear-gradient(120deg,#fff,#f8faff)}.event-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;box-shadow:0 0 0 4px #e8effa}.event strong{font-size:12px;color:#344766}.event p{margin:4px 0 0;color:#8492a9;font-size:11px;overflow-wrap:anywhere}.footer{color:#8997ac;font-size:11px;margin-top:18px;text-align:center}.toast{position:fixed;bottom:20px;right:20px;max-width:360px;padding:14px 17px;border:1px solid #d5e2f5;background:#fff;border-radius:14px;box-shadow:0 15px 40px #2b4b7a25;display:none;z-index:20;color:#253b5c}.toast.show{display:block}.toast.error{border-color:#f0bac5;color:#b52b46}.muted{color:var(--muted)}.hidden{display:none!important}
+@media(max-width:1000px){.content{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:1fr .5fr}}
+@media(max-width:620px){.wrap{padding:14px}.stats{grid-template-columns:1fr 1fr;gap:10px}.stat{padding:14px}.stat-num{font-size:26px}.panel{padding:14px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.top{align-items:flex-start}.hero{grid-template-columns:1fr;padding:22px}.agent-visual{min-height:125px}.orb{width:95px;height:95px}.hero h2{font-size:26px}.panel-title{align-items:flex-start;flex-direction:column}.search{width:100%}}
+
+
+/* ===== BRIGHT AURORA: luminous, colorful, professional light theme ===== */
+:root{
+ --bg:#f5f7ff;--panel:#ffffff;--panel2:#f9fbff;--line:#e1e8f8;
+ --text:#1b2850;--muted:#7583a5;--blue:#405af5;--blue2:#7c4dff;
+ --green:#0b9d79;--red:#e24b6a;--amber:#bf7900;--shadow:0 16px 44px rgba(64,85,171,.10)
+}
+html{background:#f5f7ff;scroll-behavior:smooth}
+body{
+ min-height:100vh;color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;position:relative;overflow-x:hidden;
+ background:radial-gradient(ellipse at 4% 3%,rgba(139,172,255,.42),transparent 30%),radial-gradient(ellipse at 96% 6%,rgba(122,241,221,.30),transparent 27%),radial-gradient(ellipse at 70% 78%,rgba(213,186,255,.23),transparent 32%),linear-gradient(135deg,#f7f9ff 0%,#f2f7ff 48%,#fff8fb 100%)
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.42;background-image:radial-gradient(#9bb2ed 1px,transparent 1px);background-size:24px 24px;mask-image:linear-gradient(to bottom,black,transparent 76%)}
+body:after{content:"";position:fixed;right:-11vw;bottom:-33vw;width:54vw;height:54vw;border-radius:50%;border:1px solid rgba(106,125,242,.14);box-shadow:0 0 0 35px rgba(106,125,242,.045),0 0 0 70px rgba(106,125,242,.035),0 0 0 105px rgba(106,125,242,.025);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1640px;padding:28px clamp(15px,3vw,44px)}
+.top{margin-bottom:22px}.brand{gap:15px}.logo{width:62px;height:62px;border-radius:21px;background:linear-gradient(145deg,#6859ff 2%,#428aff 52%,#39d8d5 100%);font-size:31px;color:#fff;box-shadow:inset 2px 2px 8px #ffffffa8,inset -7px -8px 13px #243dca55,0 13px 28px #596bdf45;transform:perspective(350px) rotateY(-12deg) rotateX(5deg)}
+h1{font-size:clamp(25px,2.4vw,34px);letter-spacing:-1.2px;color:#1d2d61;background:none;-webkit-text-fill-color:initial}.sub{font-size:12px;letter-spacing:.2px;color:#7784a2}
+.status-pill{border:1px solid #a7ead7;color:#07865f;background:linear-gradient(135deg,#f0fff9,#e2fbf1);padding:10px 15px;box-shadow:0 7px 18px rgba(19,165,122,.08)}.dot{background:#10b981;box-shadow:0 0 0 4px #10b9811c,0 0 14px #10b98155;animation:pulseDot 1.8s infinite}@keyframes pulseDot{50%{box-shadow:0 0 0 7px #10b9810c,0 0 18px #10b98188}}
+.hero{min-height:300px;grid-template-columns:minmax(0,1.45fr) minmax(240px,.7fr);padding:clamp(26px,3.5vw,48px);margin-bottom:22px;border:1px solid rgba(137,157,245,.38);border-radius:30px;background:linear-gradient(112deg,#ffffff 0%,#f0f4ff 38%,#e8f9ff 70%,#f2edff 100%);box-shadow:0 24px 60px rgba(70,91,177,.15),inset 0 1px #fff;isolation:isolate}
+.hero:before{content:"";position:absolute;width:430px;height:430px;right:3%;top:-250px;border-radius:50%;background:radial-gradient(circle,#95a9ff63,rgba(126,228,240,.16) 42%,transparent 69%);filter:blur(3px);z-index:-1}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(110deg,transparent 15%,rgba(255,255,255,.52) 48%,transparent 85%);z-index:-1}
+.eyebrow{color:#5946db;font-size:11px;letter-spacing:2px;font-weight:850}.hero h2{font-size:clamp(30px,4vw,49px);line-height:1.05;letter-spacing:-1.7px;max-width:720px;margin:13px 0 15px;color:#202d5e;text-wrap:balance}.hero h2 span{background:linear-gradient(90deg,#465af5,#8b4de8 50%,#189ed0)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}.hero p{color:#657395;max-width:620px;font-size:14px;line-height:1.85}.hero-actions{gap:12px}
+.agent-visual{min-height:220px;filter:drop-shadow(0 15px 28px rgba(76,95,216,.18))}.orb{width:158px;height:158px;background:radial-gradient(circle at 28% 18%,#fff 0 4%,#dffcff 8%,#7ce4ff 18%,#6582ff 41%,#7760ef 65%,#382bb1 100%);box-shadow:inset 8px 8px 20px #ffffffd9,inset -18px -22px 35px #3024a788,0 0 25px #62cfff88,0 22px 38px #6875db4d;animation:float 4s ease-in-out infinite,orbHue 9s linear infinite}.orb:before{left:33px;top:44px;width:14px;height:14px;box-shadow:40px 0 0 #fff,0 0 22px #fff,40px 0 22px #fff}.orb:after{left:49px;top:82px;width:40px;height:14px;border-bottom:4px solid #f5ffff;box-shadow:0 5px 14px #63eaff80}.orbit{width:225px;height:75px;border:2px solid #697eff80;box-shadow:0 0 20px #6e7bff2a,inset 0 0 18px #64cfff0c;animation:orbitPulse 5s ease-in-out infinite}.orbit.two{width:195px;height:102px;border-color:#28c9c284;box-shadow:0 0 20px #35c9c22a;animation:orbitPulse 6s ease-in-out infinite reverse}@keyframes orbitPulse{50%{filter:brightness(1.15);transform:rotate(8deg) scale(1.04)}}@keyframes orbHue{50%{filter:hue-rotate(12deg) brightness(1.05)}}
+.stats{gap:16px;margin-bottom:22px}.stat,.panel{background:rgba(255,255,255,.93);border:1px solid rgba(218,226,248,.95);border-radius:22px;box-shadow:0 15px 38px rgba(55,78,160,.09),inset 0 1px #fff;backdrop-filter:blur(16px)}.stat{padding:22px;transition:transform .24s,border-color .24s,box-shadow .24s}.stat:hover{transform:translateY(-5px) perspective(700px) rotateX(1deg);border-color:#b8c6ff;box-shadow:0 23px 42px rgba(55,78,160,.15)}.stat:after{right:-30px;top:-42px;width:125px;height:125px;background:radial-gradient(circle at 30% 30%,#e3e8ff,#dff9ff 49%,transparent 71%);box-shadow:none;opacity:.95}.stat:nth-child(1){border-top:4px solid #5c68f5}.stat:nth-child(2){border-top:4px solid #16b995}.stat:nth-child(3){border-top:4px solid #8d5bf5}.stat:nth-child(4){border-top:4px solid #ef6689}.stat-head{color:#7180a0;font-size:12px;letter-spacing:.2px}.stat-head span{font-size:17px;color:#5a66e9}.stat:nth-child(2) .stat-head span{color:#0da987}.stat:nth-child(3) .stat-head span{color:#8a5be9}.stat:nth-child(4) .stat-head span{color:#de5276}.stat-num{font-size:clamp(31px,3vw,43px);font-weight:850;color:#1f2f61;text-shadow:none}.stat-foot{color:#8a96b0;font-size:11px}
+.content{gap:20px}.panel{padding:23px}.panel-title h2{font-size:18px;color:#21305c;letter-spacing:-.4px}.panel-title p{color:#8591aa;line-height:1.6}.btn{border:1px solid #d9e2f4;border-radius:12px;padding:10px 14px;color:#334368;background:linear-gradient(180deg,#fff,#f5f7ff);box-shadow:inset 0 1px #fff,0 4px 10px rgba(57,77,139,.06);transition:transform .18s,border-color .18s,box-shadow .18s}.btn:hover{filter:brightness(1.01);transform:translateY(-2px);border-color:#a8b9fa;box-shadow:0 8px 20px rgba(77,95,170,.14)}.btn.primary{color:#fff;background:linear-gradient(115deg,#4d63f5,#7855ec 58%,#4e8cf7);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px #ffffff80,0 4px 0 #3947bb,0 11px 22px #6873e936;font-weight:800}.btn.primary:hover{box-shadow:inset 0 1px #ffffff80,0 2px 0 #3947bb,0 14px 28px #6873e94d}.btn.danger{color:#b92e51;background:linear-gradient(180deg,#fff9fa,#fff0f3);border-color:#f3c9d4}.btn.small{font-size:11px;padding:7px 10px}.btn:disabled{opacity:.42}
+.search,input,select{color:#25365d;background:#fbfcff;border:1px solid #dbe4f4;border-radius:11px}.search::placeholder,input::placeholder{color:#a0abc0}.search:focus,input:focus,select:focus{border-color:#7d94ff;box-shadow:0 0 0 3px #6e8fff20,0 0 18px #6e8fff0d}select option{background:#fff;color:#26365a}
+.table-wrap{border:1px solid #e2e8f5;border-radius:16px;background:#fff}table{border-collapse:separate;border-spacing:0;min-width:780px}th{color:#7784a0;background:linear-gradient(180deg,#f9faff,#eff3ff);border-bottom:1px solid #e3e8f6;font-size:10px;letter-spacing:1px;padding:15px 13px}td{border-top:1px solid #edf0f8;padding:15px 13px;color:#435273}tbody tr{transition:background .18s}tbody tr:hover{background:#f5f8ff}.taskname{color:#26375f;font-size:12px}.taskmeta{color:#929db4}.badge{border:1px solid transparent;padding:6px 10px;letter-spacing:.2px}.b-success{background:#e3fbf2;color:#087e5a;border-color:#b7f0dc}.b-fail{background:#fff0f3;color:#bc3150;border-color:#f7ccd6}.b-running{background:#fff7e5;color:#a36b00;border-color:#f5dfa7}.b-idle{background:#f0f3fa;color:#647390;border-color:#e0e6f2}.switch{background:#cbd5e6;box-shadow:inset 0 1px 3px #35425e21}.switch:checked{background:#17b98b;box-shadow:0 0 14px #17b98b36}.switch:before{background:#fff}
+.field label{color:#617190;font-size:12px}.hint{color:#8592aa;line-height:1.7}.event{border:1px solid #e1e8f5;border-radius:14px;background:linear-gradient(115deg,#fff,#f6f9ff);padding:13px;transition:transform .18s,border-color .18s,box-shadow .18s}.event:hover{transform:translateX(3px);border-color:#c7d3fb;box-shadow:0 6px 15px #4055a30c}.event-dot{box-shadow:0 0 0 4px #7a8cff14}.event strong{color:#38496f}.event p{color:#929db3;line-height:1.6}.empty{color:#8794ad}.footer{color:#9aa5b9;letter-spacing:.2px;margin-top:22px}.toast{color:#28395f;background:#fff;border:1px solid #dce5f5;box-shadow:0 20px 55px #233d7d24;backdrop-filter:blur(20px)}.toast.error{color:#b92e51;border-color:#f4c8d2}
+@media(max-width:1000px){.hero{grid-template-columns:1fr .55fr}.content{grid-template-columns:1fr}}
+@media(max-width:620px){.wrap{padding:14px}.top{gap:14px}.hero{grid-template-columns:1fr;padding:24px}.hero h2{font-size:30px}.agent-visual{min-height:150px}.orb{width:112px;height:112px}.orbit{width:175px}.orbit.two{width:150px}.stats{gap:10px}.stat{padding:15px;border-radius:17px}.panel{padding:15px}.panel-title{align-items:flex-start;flex-direction:column}.search{width:100%}.status-pill{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">◎</div><div><h1>Scheduler Agent</h1><div class="sub">Rule-based control center · SQLite · LangGraph · No LLM</div></div></div>
+    <div class="toolbar"><span class="status-pill"><span class="dot"></span><span id="connectionText">Connecting to local agent…</span></span><button class="btn" id="refreshBtn">↻ Refresh</button></div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">✦ AUTONOMOUS OPERATIONS · LIVE CONTROL DECK</div>
+      <h2>Your workflows.<br><span style="background:linear-gradient(90deg,#69f0ff,#a69aff);-webkit-background-clip:text;background-clip:text;color:transparent">Under intelligent control.</span></h2>
+      <p>A rule-driven agent orchestrates your scheduled jobs. Monitor execution, launch actions, and manage every workflow from one command deck — powered by SQLite + LangGraph, with no LLM.</p>
+      <div class="hero-actions">
+        <button class="btn primary" id="heroAddBtn">＋ Create a task</button>
+        <button class="btn" id="heroRefreshBtn">↻ Check latest status</button>
+      </div>
+    </div>
+    <div class="agent-visual" aria-label="Animated 3D agent illustration">
+      <div class="orbit"></div><div class="orbit two"></div><div class="orb"></div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-head">Total tasks <span>▦</span></div><div class="stat-num" id="totalCount">—</div><div class="stat-foot">Configured in SQLite</div></div>
+    <div class="stat"><div class="stat-head">Enabled <span>●</span></div><div class="stat-num" id="enabledCount">—</div><div class="stat-foot">Eligible for schedule checks</div></div>
+    <div class="stat"><div class="stat-head">Successful <span>✓</span></div><div class="stat-num" id="successCount">—</div><div class="stat-foot">Latest recorded task statuses</div></div>
+    <div class="stat"><div class="stat-head">Failed <span>!</span></div><div class="stat-num" id="failedCount">—</div><div class="stat-foot">Latest recorded task statuses</div></div>
+  </section>
+  <div class="content">
+    <main class="panel">
+      <div class="panel-title"><div><h2>Task inventory</h2><p>Enable, run, restart or remove tasks from the local scheduler.</p></div><div class="toolbar"><input id="searchInput" class="search" placeholder="Search tasks…" aria-label="Search tasks"><button class="btn primary" id="newTaskBtn">＋ Add task</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Task</th><th>Schedule</th><th>Enabled</th><th>Latest result</th><th>Actions</th></tr></thead><tbody id="taskRows"><tr><td colspan="5" class="empty">Loading tasks…</td></tr></tbody></table></div>
+      <div class="footer">Status is read from TASK_STATUS. A task marked “Running” may still be executing.</div>
+    </main>
+    <aside class="panel" id="formPanel">
+      <div class="panel-title"><div><h2 id="formTitle">Add a task</h2><p>Create a task definition in SQLite.</p></div><button class="btn small" id="cancelEditBtn">Clear</button></div>
+      <form id="taskForm">
+        <input type="hidden" id="editTaskId">
+        <div class="formgrid">
+          <div class="field full"><label for="taskName">Task name *</label><input id="taskName" required maxlength="150" placeholder="e.g. CC Level Report"></div>
+          <div class="field full"><label for="scriptPath">Script / EXE path *</label><input id="scriptPath" required placeholder="C:\Jobs\report.exe"></div>
+          <div class="field"><label for="scheduleType">Schedule type</label><select id="scheduleType"><option value="INTERVAL">Interval</option><option value="DAILY">Daily</option><option value="MANUAL">Manual only</option></select></div>
+          <div class="field"><label for="scheduleMode">Schedule mode</label><select id="scheduleMode"><option value="FIXED">Fixed interval</option><option value="ROLLING">Rolling interval</option><option value="FIXED_TIMES">Fixed times</option></select></div>
+          <div class="field"><label for="scheduleTime">Schedule time</label><input id="scheduleTime" placeholder="09:35 or 09:35,13:35"></div>
+          <div class="field"><label for="intervalMins">Interval (minutes)</label><input id="intervalMins" type="number" min="1" value="60"></div>
+          <div class="field"><label for="windowStart">Window starts</label><input id="windowStart" type="time" value="09:00"></div>
+          <div class="field"><label for="windowEnd">Window ends</label><input id="windowEnd" type="time" value="23:00"></div>
+          <div class="field"><label for="maxRuntime">Max runtime (minutes)</label><input id="maxRuntime" type="number" min="1" value="60"></div>
+          <div class="field"><label for="logCheck">Log check mode</label><select id="logCheck"><option value="AUTO">AUTO</option><option value="ENABLE">ENABLE</option><option value="DISABLE">DISABLE</option></select></div>
+          <div class="field full"><label for="logPath">Log file / folder path (optional)</label><input id="logPath" placeholder="C:\Jobs\Logs"></div>
+          <div class="field full"><label for="minutes">Log activity wait (minutes)</label><input id="minutes" type="number" min="1" value="10"></div>
+        </div>
+        <div class="form-actions"><button class="btn primary" type="submit" id="saveTaskBtn">Save task</button><button class="btn" type="button" id="resetFormBtn">Reset</button></div>
+        <p class="hint">The scheduler reads task configuration from SQLite. New/updated settings may appear after its cache refresh.</p>
+      </form>
+      <div style="height:20px"></div>
+      <div class="panel-title"><div><h2>Recent activity</h2><p>Latest status records from the agent database.</p></div></div>
+      <div class="events" id="activityList"><div class="empty">No activity loaded.</div></div>
+    </aside>
+  </div>
+  <div class="footer">Local dashboard only · Keep the agent API bound to 127.0.0.1 · Do not expose it directly to the internet.</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const API = "/api";
+let tasks = [];
+const $ = id => document.getElementById(id);
+function toast(message, error=false){const el=$("toast");el.textContent=message;el.className="toast show"+(error?" error":"");setTimeout(()=>el.className="toast",3600)}
+async function api(path, options={}) {
+  const res = await fetch(API+path,{headers:{"Content-Type":"application/json",...(options.headers||{})},...options});
+  const body = await res.json().catch(()=>({error:"Invalid server response"}));
+  if(!res.ok) throw new Error(body.error||`Request failed (${res.status})`);
+  return body;
+}
+function enabled(v){return ["Y","YES","1","TRUE","ENABLED"].includes(String(v??"Y").toUpperCase())}
+function statusClass(s){s=String(s||"").toUpperCase();if(["SUCCESS","SUCCEEDED","COMPLETED","DONE"].includes(s))return "b-success";if(["FAILED","ERROR","CRASHED","TIMEOUT","FILE_NOT_FOUND"].includes(s))return "b-fail";if(["RUNNING","STARTED","RETRYING"].includes(s))return "b-running";return "b-idle"}
+function displayStatus(t){return t.LATEST_STATUS||"No run recorded"}
+function scheduleText(t){const type=String(t.SCHEDULE_TYPE||"MANUAL").toUpperCase();if(type==="DAILY")return `Daily · ${t.SCHEDULE_TIME||"—"}`;if(type==="INTERVAL")return `${t.INTERVAL_MIN||"?"} min · ${t.SCHEDULE_MODE||"FIXED"}`;return "Manual only"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderTasks(){
+ const q=$("searchInput").value.toLowerCase();
+ const rows=tasks.filter(t=>`${t.TASK_NAME} ${t.SCRIPT_PATH} ${t.TASK_ID}`.toLowerCase().includes(q));
+ $("taskRows").innerHTML=rows.length?rows.map(t=>`<tr>
+ <td><div class="taskname">${esc(t.TASK_NAME||"Unnamed task")}</div><div class="taskmeta">ID ${esc(t.TASK_ID)} · ${esc(t.SCRIPT_PATH||"No path")}</div></td>
+ <td><div>${esc(scheduleText(t))}</div><div class="taskmeta">${esc(t.WINDOW_START||"")} – ${esc(t.WINDOW_END||"")}</div></td>
+ <td><input class="switch" type="checkbox" aria-label="Enable ${esc(t.TASK_NAME)}" ${enabled(t.ENABLED)?"checked":""} onchange="toggleTask(${Number(t.TASK_ID)},this.checked)"></td>
+ <td><span class="badge ${statusClass(t.LATEST_STATUS)}">${esc(displayStatus(t))}</span><div class="taskmeta">${esc(t.LAST_RUN||t.STATUS_UPDATED||"")}</div></td>
+ <td><div class="toolbar"><button class="btn small" onclick="runTask(${Number(t.TASK_ID)},'RUN')" ${enabled(t.ENABLED)?"":"disabled"}>▶ Run</button><button class="btn small" onclick="runTask(${Number(t.TASK_ID)},'E_RUN')" ${enabled(t.ENABLED)?"":"disabled"}>↻ Restart</button><button class="btn small" onclick="editTask(${Number(t.TASK_ID)})">Edit</button><button class="btn small danger" onclick="deleteTask(${Number(t.TASK_ID)})">Delete</button></div></td>
+ </tr>`).join(""):`<tr><td colspan="5" class="empty">No tasks found. Add your first task using the form.</td></tr>`;
+ $("totalCount").textContent=tasks.length;
+ $("enabledCount").textContent=tasks.filter(t=>enabled(t.ENABLED)).length;
+ $("successCount").textContent=tasks.filter(t=>["SUCCESS","SUCCEEDED","COMPLETED","DONE"].includes(String(t.LATEST_STATUS||"").toUpperCase())).length;
+ $("failedCount").textContent=tasks.filter(t=>["FAILED","ERROR","CRASHED","TIMEOUT","FILE_NOT_FOUND"].includes(String(t.LATEST_STATUS||"").toUpperCase())).length;
+}
+function renderActivity(items){
+ $("activityList").innerHTML=items.length?items.slice(0,8).map(x=>`<div class="event"><div class="event-dot" style="background:${statusClass(x.STATUS)==="b-success"?"var(--green)":statusClass(x.STATUS)==="b-fail"?"var(--red)":statusClass(x.STATUS)==="b-running"?"var(--amber)":"var(--blue)"}"></div><div><strong>${esc(x.TASK_NAME||("Task "+x.TASK_ID))} · ${esc(x.STATUS||"Unknown")}</strong><p>${esc(x.UPDATED_TIME||x.LAST_RUN||"")} ${x.MESSAGE?"— "+esc(x.MESSAGE):""}</p></div></div>`).join(""):`<div class="empty">No status records yet.</div>`;
+}
+async function refresh(){
+ try{
+   const data=await api("/tasks");
+   tasks=data.tasks||[];
+   renderTasks();
+   renderActivity(data.activity||[]);
+   $("connectionText").textContent="Agent API connected";
+ }catch(e){$("connectionText").textContent="Agent API offline";$("taskRows").innerHTML=`<tr><td colspan="5" class="empty">Cannot connect to the local agent API.<br>${esc(e.message)}<br>Start scheduler_dashboard_api.py and refresh.</td></tr>`;toast(e.message,true)}
+}
+async function toggleTask(id,enable){
+ try{await api(`/tasks/${id}/enabled`,{method:"PATCH",body:JSON.stringify({enabled:enable})});toast(enable?"Task enabled":"Task disabled");await refresh()}catch(e){toast(e.message,true);await refresh()}
+}
+async function runTask(id,action){
+ const label=action==="E_RUN"?"restart this task (terminate + relaunch)":"run this task now";
+ if(!confirm(`Do you want to ${label}?`))return;
+ try{await api(`/tasks/${id}/action`,{method:"POST",body:JSON.stringify({action})});toast(action==="E_RUN"?"Restart request queued":"Run request queued");await refresh()}catch(e){toast(e.message,true)}
+}
+async function deleteTask(id){
+ const t=tasks.find(x=>Number(x.TASK_ID)===id);
+ if(!confirm(`Delete "${t?.TASK_NAME||id}" from TASK_MASTER? This does not delete its status history.`))return;
+ try{await api(`/tasks/${id}`,{method:"DELETE"});toast("Task deleted");await refresh();resetForm()}catch(e){toast(e.message,true)}
+}
+function resetForm(){ $("taskForm").reset();$("editTaskId").value="";$("formTitle").textContent="Add a task";$("saveTaskBtn").textContent="Save task";$("intervalMins").value=60;$("maxRuntime").value=60;$("minutes").value=10;$("windowStart").value="09:00";$("windowEnd").value="23:00"; }
+function editTask(id){
+ const t=tasks.find(x=>Number(x.TASK_ID)===id);if(!t)return;
+ $("editTaskId").value=t.TASK_ID;$("taskName").value=t.TASK_NAME||"";$("scriptPath").value=t.SCRIPT_PATH||"";
+ $("scheduleType").value=t.SCHEDULE_TYPE||"INTERVAL";$("scheduleMode").value=t.SCHEDULE_MODE||"FIXED";
+ $("scheduleTime").value=t.SCHEDULE_TIME||"";$("intervalMins").value=t.INTERVAL_MIN||60;
+ $("windowStart").value=t.WINDOW_START||"";$("windowEnd").value=t.WINDOW_END||"";
+ $("maxRuntime").value=t.MAX_RUNTIME_MIN||60;$("logCheck").value=t.LOG_CHECK||"AUTO";
+ $("logPath").value=t.LOG_PATH||"";$("minutes").value=t.MINUTES||10;
+ $("formTitle").textContent=`Edit task #${id}`;$("saveTaskBtn").textContent="Update task";
+ $("formPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("taskForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const id=$("editTaskId").value;
+ const payload={TASK_NAME:$("taskName").value.trim(),SCRIPT_PATH:$("scriptPath").value.trim(),SCHEDULE_TYPE:$("scheduleType").value,SCHEDULE_MODE:$("scheduleMode").value,SCHEDULE_TIME:$("scheduleTime").value.trim(),INTERVAL_MIN:Number($("intervalMins").value||60),WINDOW_START:$("windowStart").value,WINDOW_END:$("windowEnd").value,MAX_RUNTIME_MIN:Number($("maxRuntime").value||60),LOG_CHECK:$("logCheck").value,LOG_PATH:$("logPath").value.trim(),MINUTES:Number($("minutes").value||10)};
+ try{if(id){await api(`/tasks/${id}`,{method:"PUT",body:JSON.stringify(payload)});toast("Task updated")}else{await api("/tasks",{method:"POST",body:JSON.stringify(payload)});toast("Task added")};resetForm();await refresh()}catch(err){toast(err.message,true)}
+});
+$("searchInput").addEventListener("input",renderTasks);$("refreshBtn").addEventListener("click",refresh);$("heroRefreshBtn").addEventListener("click",refresh);$("heroAddBtn").addEventListener("click",()=>{resetForm();$("formPanel").scrollIntoView({behavior:"smooth",block:"start"});$("taskName").focus()});$("newTaskBtn").addEventListener("click",()=>{resetForm();$("formPanel").scrollIntoView({behavior:"smooth",block:"start"});$("taskName").focus()});$("cancelEditBtn").addEventListener("click",resetForm);$("resetFormBtn").addEventListener("click",resetForm);
+refresh();setInterval(refresh,15000);
+</script>
+</body>
+</html>
